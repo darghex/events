@@ -3,6 +3,9 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from sqlmodel import SQLModel
+
+from app import models  # noqa: F401  -- importa modelos para registrar metadata
 from app.core.config import get_settings
 
 config = context.config
@@ -13,8 +16,7 @@ if config.config_file_name is not None:
 # Inyecta la URL desde settings (única fuente de verdad)
 config.set_main_option("sqlalchemy.url", get_settings().DATABASE_URL)
 
-# En Fase 1 se reemplaza por el metadata real de los modelos
-target_metadata = None
+target_metadata = SQLModel.metadata
 
 
 def run_migrations_offline() -> None:
