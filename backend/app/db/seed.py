@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 from app.core.config import get_settings
 from app.core.security import hash_password
-from app.db.session import engine
+from app.db.session import engine, transactional
 from app.models.user import User, UserRole
 from app.repositories.user import UserRepository
 
@@ -27,12 +27,12 @@ def seed_admin() -> User | None:
         if existing:
             logger.info("Seed admin: ya existe %s", existing.email)
             return existing
-        user = repo.create(
-            email=email,
-            password_hash=hash_password(password),
-            role=UserRole.ADMIN,
-        )
-        session.commit()
+        with transactional(session):
+            user = repo.create(
+                email=email,
+                password_hash=hash_password(password),
+                role=UserRole.ADMIN,
+            )
         session.refresh(user)
         logger.info("Seed admin creado: %s", user.email)
         return user

@@ -13,6 +13,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.db.session import transactional
 from app.models.user import User, UserRole
 from app.repositories.user import UserRepository
 
@@ -23,14 +24,14 @@ class AuthService:
         self.users = UserRepository(session)
 
     def register(self, *, email: str, password: str) -> User:
-        if self.users.get_by_email(email):
-            raise UserAlreadyExists(details={"email": email.lower()})
-        user = self.users.create(
-            email=email,
-            password_hash=hash_password(password),
-            role=UserRole.ATTENDEE,
-        )
-        self.session.commit()
+        with transactional(self.session):
+            if self.users.get_by_email(email):
+                raise UserAlreadyExists(details={"email": email.lower()})
+            user = self.users.create(
+                email=email,
+                password_hash=hash_password(password),
+                role=UserRole.ATTENDEE,
+            )
         self.session.refresh(user)
         return user
 

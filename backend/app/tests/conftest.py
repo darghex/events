@@ -5,11 +5,14 @@ todos los `Depends(get_session)` resuelven contra la SQLite de cada test.
 """
 import os
 
-# Valores estables para que Settings cargue sin requerir un .env real
-os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
-os.environ.setdefault("JWT_SECRET", "test-secret-please-change-1234567890")
-os.environ.setdefault("ACCESS_TOKEN_TTL_MINUTES", "15")
-os.environ.setdefault("REFRESH_TOKEN_TTL_DAYS", "7")
+# Variables forzadas para los tests (sobre-escriben lo que haya en .env del host)
+os.environ["DATABASE_URL"] = "sqlite:///./test.db"
+os.environ["JWT_SECRET"] = "test-secret-please-change-1234567890"
+os.environ["ACCESS_TOKEN_TTL_MINUTES"] = "15"
+os.environ["REFRESH_TOKEN_TTL_DAYS"] = "7"
+# Apaga el seed admin: cada test crea sus propios usuarios.
+os.environ.pop("SEED_ADMIN_EMAIL", None)
+os.environ.pop("SEED_ADMIN_PASSWORD", None)
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
