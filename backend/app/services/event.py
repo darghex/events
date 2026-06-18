@@ -1,6 +1,7 @@
 from sqlmodel import Session
 
 from app.core.errors import (
+    EventCapacityBelowSession,
     EventNotMutable,
     Forbidden,
     InvalidTransition,
@@ -11,6 +12,7 @@ from app.db.session import transactional
 from app.models.event import Event, EventStatus
 from app.models.user import User, UserRole
 from app.repositories.event import EventRepository
+from app.repositories.event_session import EventSessionRepository
 from app.schemas.event import EventCreate, EventUpdate
 from app.services import event_state
 
@@ -19,6 +21,7 @@ class EventService:
     def __init__(self, session: Session) -> None:
         self.session = session
         self.events = EventRepository(session)
+        self.sessions_repo = EventSessionRepository(session)
 
     # ---------- queries ----------
     def list_published(
@@ -71,6 +74,23 @@ class EventService:
                     "start_at debe ser anterior a end_at",
                     details={"fields": ["start_at", "end_at"]},
                 )
+
+            # Fase 4: si el patch baja capacity, no puede ir por debajo del aforo
+            # de alguna sesión ya programada.
+            if "capacity" in clean_patch:
+                new_capacity = clean_patch["capacity"]
+                max_session_capacity = self.sessions_repo.max_capacity_for_event(event.id)
+                if (
+                    max_session_capacity is not None
+                    and new_capacity < max_session_capacity
+                ):
+                    raise EventCapacityBelowSession(
+                        details={
+                            "event_id": event.id,
+                            "new_capacity": new_capacity,
+                            "max_session_capacity": max_session_capacity,
+                        },
+                    )
 
             event = self.events.update(event, clean_patch)
         self.session.refresh(event)

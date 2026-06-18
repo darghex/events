@@ -9,6 +9,7 @@ help:
 	@echo "  down-v     Detiene el stack y elimina volúmenes (DB efímera)"
 	@echo "  logs       Sigue los logs de todos los servicios"
 	@echo "  ps         Estado de los servicios"
+	@echo "  migrate    upgrade de migraciones alembic"
 	@echo "  sh-back    Shell dentro del contenedor backend"
 	@echo "  sh-front   Shell dentro del contenedor frontend"
 	@echo "  test       Corre tests backend + frontend"
@@ -30,6 +31,9 @@ logs:
 
 ps:
 	$(COMPOSE) ps
+
+migrate:
+	$(COMPOSE) exec backend poetry run alembic upgrade head
 
 sh-back:
 	$(COMPOSE) exec backend sh

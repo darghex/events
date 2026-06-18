@@ -23,9 +23,6 @@ export function Navbar() {
         fontFamily: 'system-ui',
       }}
     >
-      <Link to="/events" style={{ color: '#111', fontWeight: 600 }}>
-        Mis Eventos
-      </Link>
       <Link to="/events">Eventos</Link>
       {canManage && <Link to="/me/events">Mis eventos</Link>}
       <span style={{ flex: 1 }} />

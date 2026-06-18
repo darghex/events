@@ -11,6 +11,8 @@ import EventDetailPage from './pages/events/EventDetailPage';
 import EventEditPage from './pages/events/EventEditPage';
 import EventsListPage from './pages/events/EventsListPage';
 import MyEventsPage from './pages/events/MyEventsPage';
+import SessionCreatePage from './pages/sessions/SessionCreatePage';
+import SessionEditPage from './pages/sessions/SessionEditPage';
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,22 @@ export default function App() {
             element={
               <RequireRole roles={['ORGANIZER', 'ADMIN']}>
                 <EventEditPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/events/:id/sessions/new"
+            element={
+              <RequireRole roles={['ORGANIZER', 'ADMIN']}>
+                <SessionCreatePage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/events/:id/sessions/:sessionId/edit"
+            element={
+              <RequireRole roles={['ORGANIZER', 'ADMIN']}>
+                <SessionEditPage />
               </RequireRole>
             }
           />

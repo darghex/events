@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { extractApiError } from '../../api/errors';
 import { EventTransitionsBar } from '../../components/events/EventTransitionsBar';
+import { SessionsAgenda } from '../../components/sessions/SessionsAgenda';
 import { StatusBadge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { useDeleteEvent, useEventDetail } from '../../hooks/events';
@@ -69,6 +70,8 @@ export default function EventDetailPage() {
           )}
         </div>
       )}
+
+      <SessionsAgenda event={data} user={user ?? null} />
     </main>
   );
 }

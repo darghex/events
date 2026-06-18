@@ -62,3 +62,28 @@ class InvalidTransition(DomainError):
     code = "INVALID_TRANSITION"
     status_code = 409
     message = "Transición de estado no permitida"
+
+
+# ---------- Event Sessions ----------
+class SessionOutOfRange(DomainError):
+    code = "SESSION_OUT_OF_RANGE"
+    status_code = 409
+    message = "Sesión fuera del marco temporal del evento padre"
+
+
+class SessionOverlap(DomainError):
+    code = "SESSION_OVERLAP"
+    status_code = 409
+    message = "El ponente tiene otra sesión activa que se solapa en el tiempo"
+
+
+class SessionCapacityExceedsEvent(DomainError):
+    code = "SESSION_CAPACITY_EXCEEDS_EVENT"
+    status_code = 409
+    message = "La capacidad de la sesión no puede exceder la del evento"
+
+
+class EventCapacityBelowSession(DomainError):
+    code = "EVENT_CAPACITY_BELOW_SESSION"
+    status_code = 409
+    message = "La capacidad del evento no puede ser menor que la de una sesión existente"
