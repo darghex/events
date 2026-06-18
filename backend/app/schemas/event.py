@@ -81,6 +81,10 @@ class EventListItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class EventTransitionRequest(BaseModel):
+    to_status: EventStatus
+
+
 T = TypeVar("T")
 
 

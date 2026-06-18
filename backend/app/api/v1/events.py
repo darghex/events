@@ -8,6 +8,7 @@ from app.schemas.event import (
     EventCreate,
     EventListItem,
     EventRead,
+    EventTransitionRequest,
     EventUpdate,
     Page,
 )
@@ -118,3 +119,18 @@ def delete_event(
 ) -> Response:
     service.delete(actor=actor, event_id=event_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/{event_id}/transition",
+    response_model=EventRead,
+    summary="Transicionar el estado del evento según la matriz declarada.",
+)
+def transition_event(
+    event_id: int,
+    payload: EventTransitionRequest,
+    actor: User = Depends(get_current_user),
+    service: EventService = Depends(_service),
+) -> EventRead:
+    event = service.transition(actor=actor, event_id=event_id, to_status=payload.to_status)
+    return EventRead.model_validate(event)

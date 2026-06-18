@@ -56,3 +56,9 @@ class EventNotMutable(DomainError):
     code = "EVENT_NOT_MUTABLE"
     status_code = 409
     message = "El evento solo puede editarse o eliminarse en estado Draft"
+
+
+class InvalidTransition(DomainError):
+    code = "INVALID_TRANSITION"
+    status_code = 409
+    message = "Transición de estado no permitida"

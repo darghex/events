@@ -1,11 +1,18 @@
 from sqlmodel import Session
 
-from app.core.errors import EventNotMutable, Forbidden, NotFound, ValidationFailed
+from app.core.errors import (
+    EventNotMutable,
+    Forbidden,
+    InvalidTransition,
+    NotFound,
+    ValidationFailed,
+)
 from app.db.session import transactional
 from app.models.event import Event, EventStatus
 from app.models.user import User, UserRole
 from app.repositories.event import EventRepository
 from app.schemas.event import EventCreate, EventUpdate
+from app.services import event_state
 
 
 class EventService:
@@ -81,6 +88,42 @@ class EventService:
                     details={"event_id": event.id, "current_status": event.status.value},
                 )
             self.events.delete(event)
+
+    def transition(self, *, actor: User, event_id: int, to_status: EventStatus) -> Event:
+        with transactional(self.session):
+            event = self.events.get(event_id)
+            if event is None:
+                raise NotFound("Evento no encontrado")
+
+            rule = event_state.TRANSITIONS.get((event.status, to_status))
+            if rule is None:
+                raise InvalidTransition(
+                    details={
+                        "event_id": event.id,
+                        "from_status": event.status.value,
+                        "to_status": to_status.value,
+                        "reason": "transition not allowed",
+                    },
+                )
+
+            if actor.role not in rule.allowed_roles:
+                raise Forbidden("Rol no autorizado para esta transición")
+            if (
+                rule.requires_ownership
+                and actor.role != UserRole.ADMIN
+                and event.owner_id != actor.id
+            ):
+                raise Forbidden("Solo el dueño o un admin puede transicionar este evento")
+
+            rule.validator(event, event_state._now_utc())
+
+            # TODO Fase 5: si (event.status, to_status) == (PUBLISHED, CANCELLED),
+            # cancelar todas las Registrations activas en cascada transaccional.
+            event.status = to_status
+            self.session.add(event)
+            self.session.flush()
+        self.session.refresh(event)
+        return event
 
     # ---------- helpers ----------
     @staticmethod
