@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
@@ -47,6 +48,7 @@ def create_access_token(user_id: int, role: UserRole) -> str:
             "type": "access",
             "iat": int(_now_utc().timestamp()),
             "exp": int(expire.timestamp()),
+            "jti": uuid.uuid4().hex,
         }
     )
 
@@ -59,6 +61,7 @@ def create_refresh_token(user_id: int) -> str:
             "type": "refresh",
             "iat": int(_now_utc().timestamp()),
             "exp": int(expire.timestamp()),
+            "jti": uuid.uuid4().hex,
         }
     )
 
@@ -87,6 +90,26 @@ def get_current_user(
     user = session.get(User, user_id)
     if user is None or not user.is_active:
         raise AuthTokenExpired("Usuario inválido o inactivo")
+    return user
+
+
+def get_optional_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+    session: Session = Depends(get_session),
+) -> User | None:
+    """Variante no obligatoria: retorna None si no hay header o token inválido.
+
+    Útil para endpoints "públicos con vista ampliada para auth" (ej. detalle de evento Draft).
+    """
+    if credentials is None:
+        return None
+    try:
+        payload = decode_token(credentials.credentials, expected_type="access")
+    except AuthTokenExpired:
+        return None
+    user = session.get(User, int(payload["sub"]))
+    if user is None or not user.is_active:
+        return None
     return user
 
 

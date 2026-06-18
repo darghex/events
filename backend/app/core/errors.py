@@ -39,7 +39,20 @@ class NotFound(DomainError):
     message = "Recurso no encontrado"
 
 
+class ValidationFailed(DomainError):
+    code = "VALIDATION_ERROR"
+    status_code = 422
+    message = "Validación fallida"
+
+
 class UserAlreadyExists(DomainError):
     code = "USER_ALREADY_EXISTS"
     status_code = 409
     message = "El email ya está registrado"
+
+
+# ---------- Events ----------
+class EventNotMutable(DomainError):
+    code = "EVENT_NOT_MUTABLE"
+    status_code = 409
+    message = "El evento solo puede editarse o eliminarse en estado Draft"
