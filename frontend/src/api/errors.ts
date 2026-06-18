@@ -9,6 +9,7 @@ const MESSAGES: Record<string, string> = {
   VALIDATION_ERROR: 'Datos inválidos',
   USER_ALREADY_EXISTS: 'Este email ya está registrado',
   EVENT_NOT_MUTABLE: 'El evento solo puede modificarse mientras está en Borrador',
+  INVALID_TRANSITION: 'Esta transición no está permitida en el estado actual',
 };
 
 export function extractApiError(err: unknown): { code?: string; message: string } {

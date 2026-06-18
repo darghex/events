@@ -5,10 +5,12 @@ import {
   getEvent,
   listEvents,
   listMyEvents,
+  transitionEvent,
   updateEvent,
 } from '../api/events';
 import type {
   EventCreateInput,
+  EventStatus,
   EventUpdateInput,
   EventsListParams,
 } from '../types/event';
@@ -65,6 +67,14 @@ export function useDeleteEvent() {
   const invalidate = useInvalidateLists();
   return useMutation({
     mutationFn: (id: number) => deleteEvent(id),
+    onSuccess: invalidate,
+  });
+}
+
+export function useTransitionEvent(id: number) {
+  const invalidate = useInvalidateLists();
+  return useMutation({
+    mutationFn: (toStatus: EventStatus) => transitionEvent(id, toStatus),
     onSuccess: invalidate,
   });
 }

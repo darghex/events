@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { extractApiError } from '../../api/errors';
+import { EventTransitionsBar } from '../../components/events/EventTransitionsBar';
 import { StatusBadge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { useDeleteEvent, useEventDetail } from '../../hooks/events';
@@ -50,6 +51,7 @@ export default function EventDetailPage() {
         <h1 style={{ margin: 0 }}>{data.title}</h1>
         <StatusBadge status={data.status} />
       </header>
+      <EventTransitionsBar event={data} user={user ?? null} />
       <p style={{ color: '#4b5563' }}>{data.location}</p>
       <p style={{ color: '#4b5563' }}>{formatRange(data.start_at, data.end_at)}</p>
       <p style={{ color: '#6b7280' }}>Capacidad: {data.capacity}</p>

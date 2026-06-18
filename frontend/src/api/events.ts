@@ -2,6 +2,7 @@ import { api } from './client';
 import type {
   EventCreateInput,
   EventRead,
+  EventStatus,
   EventUpdateInput,
   EventsListParams,
   EventsPage,
@@ -36,4 +37,9 @@ export async function updateEvent(id: number, patch: EventUpdateInput): Promise<
 
 export async function deleteEvent(id: number): Promise<void> {
   await api.delete(`/events/${id}`);
+}
+
+export async function transitionEvent(id: number, toStatus: EventStatus): Promise<EventRead> {
+  const { data } = await api.post<EventRead>(`/events/${id}/transition`, { to_status: toStatus });
+  return data;
 }
