@@ -1,5 +1,7 @@
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'IN_PROGRESS' | 'FINISHED' | 'CANCELLED';
 
+export type RegistrationStatus = 'CONFIRMED' | 'CANCELLED';
+
 export interface EventRead {
   id: number;
   title: string;
@@ -12,6 +14,9 @@ export interface EventRead {
   owner_id: number;
   created_at: string;
   updated_at: string;
+  confirmed_count: number;
+  is_full: boolean;
+  my_registration_status: RegistrationStatus | null;
 }
 
 export interface EventListItem {
@@ -23,6 +28,8 @@ export interface EventListItem {
   capacity: number;
   status: EventStatus;
   owner_id: number;
+  confirmed_count: number;
+  is_full: boolean;
 }
 
 export interface EventsPage {

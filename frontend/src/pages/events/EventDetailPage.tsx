@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { extractApiError } from '../../api/errors';
 import { EventTransitionsBar } from '../../components/events/EventTransitionsBar';
+import { RegistrationButton } from '../../components/events/RegistrationButton';
 import { SessionsAgenda } from '../../components/sessions/SessionsAgenda';
 import { StatusBadge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -53,6 +54,7 @@ export default function EventDetailPage() {
         <StatusBadge status={data.status} />
       </header>
       <EventTransitionsBar event={data} user={user ?? null} />
+      <RegistrationButton event={data} user={user ?? null} />
       <p style={{ color: '#4b5563' }}>{data.location}</p>
       <p style={{ color: '#4b5563' }}>{formatRange(data.start_at, data.end_at)}</p>
       <p style={{ color: '#6b7280' }}>Capacidad: {data.capacity}</p>

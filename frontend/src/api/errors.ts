@@ -15,6 +15,10 @@ const MESSAGES: Record<string, string> = {
   SESSION_CAPACITY_EXCEEDS_EVENT: 'La capacidad de la sesión no puede superar la del evento',
   EVENT_CAPACITY_BELOW_SESSION:
     'No puedes reducir el aforo del evento por debajo de una sesión existente',
+  EVENT_FULL: 'El evento alcanzó su capacidad máxima',
+  DUPLICATE_REGISTRATION: 'Ya tienes una inscripción activa en este evento',
+  SPEAKER_CANNOT_REGISTER: 'Eres ponente del evento, no puedes inscribirte como asistente',
+  INVALID_REGISTRATION_STATE: 'Las inscripciones solo se aceptan cuando el evento está publicado',
 };
 
 export function extractApiError(err: unknown): { code?: string; message: string } {

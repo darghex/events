@@ -269,10 +269,11 @@ def test_transition_only_mutates_status(client, session) -> None:
     assert body["status"] == "PUBLISHED"
 
 
-def test_transition_marker_for_phase_5_present() -> None:
-    """Verifica que el comentario marcador para Fase 5 está presente en el código fuente."""
+def test_transition_published_to_cancelled_invokes_registration_cascade() -> None:
+    """Verifica que el servicio invoca la cascada de Registrations en la transición
+    Published → Cancelled (reemplaza al marcador TODO Fase 5 una vez implementada)."""
     from pathlib import Path
     source = Path(__file__).resolve().parents[1] / "services" / "event.py"
     text = source.read_text()
-    assert "TODO Fase 5" in text
-    assert "Registrations" in text
+    assert "mark_all_active_cancelled_for_event" in text
+    assert "PUBLISHED" in text and "CANCELLED" in text

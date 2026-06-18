@@ -87,3 +87,28 @@ class EventCapacityBelowSession(DomainError):
     code = "EVENT_CAPACITY_BELOW_SESSION"
     status_code = 409
     message = "La capacidad del evento no puede ser menor que la de una sesión existente"
+
+
+# ---------- Registrations ----------
+class EventFull(DomainError):
+    code = "EVENT_FULL"
+    status_code = 409
+    message = "El evento alcanzó su capacidad máxima"
+
+
+class DuplicateRegistration(DomainError):
+    code = "DUPLICATE_REGISTRATION"
+    status_code = 409
+    message = "Ya existe una inscripción activa para este evento"
+
+
+class SpeakerCannotRegister(DomainError):
+    code = "SPEAKER_CANNOT_REGISTER"
+    status_code = 409
+    message = "Un ponente del evento no puede inscribirse como asistente"
+
+
+class InvalidRegistrationState(DomainError):
+    code = "INVALID_REGISTRATION_STATE"
+    status_code = 409
+    message = "Las inscripciones solo se aceptan cuando el evento está publicado"

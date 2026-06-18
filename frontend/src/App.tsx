@@ -13,6 +13,7 @@ import EventsListPage from './pages/events/EventsListPage';
 import MyEventsPage from './pages/events/MyEventsPage';
 import SessionCreatePage from './pages/sessions/SessionCreatePage';
 import SessionEditPage from './pages/sessions/SessionEditPage';
+import MyRegistrationsPage from './pages/registrations/MyRegistrationsPage';
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <ProfilePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/me/registrations"
+            element={
+              <RequireAuth>
+                <MyRegistrationsPage />
               </RequireAuth>
             }
           />

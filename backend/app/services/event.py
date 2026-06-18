@@ -13,7 +13,8 @@ from app.models.event import Event, EventStatus
 from app.models.user import User, UserRole
 from app.repositories.event import EventRepository
 from app.repositories.event_session import EventSessionRepository
-from app.schemas.event import EventCreate, EventUpdate
+from app.repositories.registration import RegistrationRepository
+from app.schemas.event import EventCreate, EventListItem, EventRead, EventUpdate
 from app.services import event_state
 
 
@@ -22,6 +23,7 @@ class EventService:
         self.session = session
         self.events = EventRepository(session)
         self.sessions_repo = EventSessionRepository(session)
+        self.registrations_repo = RegistrationRepository(session)
 
     # ---------- queries ----------
     def list_published(
@@ -137,13 +139,73 @@ class EventService:
 
             rule.validator(event, event_state._now_utc())
 
-            # TODO Fase 5: si (event.status, to_status) == (PUBLISHED, CANCELLED),
-            # cancelar todas las Registrations activas en cascada transaccional.
+            from_status = event.status
             event.status = to_status
             self.session.add(event)
             self.session.flush()
+
+            # Cascada Fase 5: cancelar el evento Published libera todas las
+            # inscripciones activas dentro de la misma transacción atómica.
+            if (from_status, to_status) == (
+                EventStatus.PUBLISHED,
+                EventStatus.CANCELLED,
+            ):
+                RegistrationRepository(self.session).mark_all_active_cancelled_for_event(
+                    event.id
+                )
         self.session.refresh(event)
         return event
+
+    # ---------- hidratación con counts (Fase 5) ----------
+    def hydrate_read(self, event: Event, *, actor: User | None) -> EventRead:
+        confirmed = self.registrations_repo.count_confirmed(event.id)
+        my_status = None
+        if actor is not None:
+            statuses = self.registrations_repo.active_status_for_user_events(
+                user_id=actor.id, event_ids=[event.id]
+            )
+            my_status = statuses.get(event.id)
+        return EventRead(
+            id=event.id,
+            title=event.title,
+            description=event.description,
+            location=event.location,
+            capacity=event.capacity,
+            start_at=event.start_at,
+            end_at=event.end_at,
+            status=event.status,
+            owner_id=event.owner_id,
+            created_at=event.created_at,
+            updated_at=event.updated_at,
+            confirmed_count=confirmed,
+            is_full=confirmed >= event.capacity,
+            my_registration_status=my_status,
+        )
+
+    def hydrate_list_items(self, events: list[Event]) -> list[EventListItem]:
+        """Listados: solo confirmed_count + is_full (sin my_registration_status para no inflar)."""
+        if not events:
+            return []
+        event_ids = [e.id for e in events]
+        counts = self.registrations_repo.count_confirmed_for_events(event_ids)
+        items: list[EventListItem] = []
+        for e in events:
+            c = counts.get(e.id, 0)
+            items.append(
+                EventListItem(
+                    id=e.id,
+                    title=e.title,
+                    location=e.location,
+                    start_at=e.start_at,
+                    end_at=e.end_at,
+                    capacity=e.capacity,
+                    status=e.status,
+                    owner_id=e.owner_id,
+                    confirmed_count=c,
+                    is_full=c >= e.capacity,
+                )
+            )
+        return items
 
     # ---------- helpers ----------
     @staticmethod

@@ -11,6 +11,15 @@ class EventRepository:
     def get(self, event_id: int) -> Event | None:
         return self.session.get(Event, event_id)
 
+    def get_for_update(self, event_id: int) -> Event | None:
+        """SELECT ... FOR UPDATE para serializar inscripciones concurrentes.
+
+        En Postgres real aplica el lock pesimista. En SQLite la cláusula se
+        ignora (no rompe); el StaticPool de tests serializa las queries.
+        """
+        stmt = select(Event).where(Event.id == event_id).with_for_update()
+        return self.session.exec(stmt).first()
+
     def list_published(
         self, *, q: str | None, limit: int, offset: int
     ) -> tuple[list[Event], int]:

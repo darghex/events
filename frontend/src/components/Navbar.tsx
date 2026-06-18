@@ -25,6 +25,7 @@ export function Navbar() {
     >
       <Link to="/events">Eventos</Link>
       {canManage && <Link to="/me/events">Mis eventos</Link>}
+      {isAuthed && <Link to="/me/registrations">Mis inscripciones</Link>}
       <span style={{ flex: 1 }} />
       {isAuthed ? (
         <>

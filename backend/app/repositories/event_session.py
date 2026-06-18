@@ -12,6 +12,16 @@ class EventSessionRepository:
     def get(self, session_id: int) -> EventSession | None:
         return self.session.get(EventSession, session_id)
 
+    def is_speaker_of_event(self, *, user_id: int, event_id: int) -> bool:
+        """True si el usuario está asignado como speaker de al menos una sesión del evento."""
+        stmt = (
+            select(EventSession.id)
+            .where(EventSession.event_id == event_id)
+            .where(EventSession.speaker_id == user_id)
+            .limit(1)
+        )
+        return self.session.exec(stmt).first() is not None
+
     def list_by_event(self, event_id: int, *, limit: int = 200) -> list[EventSession]:
         stmt = (
             select(EventSession)

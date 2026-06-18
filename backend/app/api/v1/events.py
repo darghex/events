@@ -26,7 +26,7 @@ def _service(session: Session = Depends(get_session)) -> EventService:
 
 def _paginate(items, total: int, limit: int, offset: int) -> Page[EventListItem]:
     return Page[EventListItem](
-        items=[EventListItem.model_validate(item) for item in items],
+        items=items,
         total=total,
         limit=limit,
         offset=offset,
@@ -44,7 +44,8 @@ def list_published(
     offset: int = Query(default=0, ge=0),
     service: EventService = Depends(_service),
 ) -> Page[EventListItem]:
-    items, total = service.list_published(q=q, limit=limit, offset=offset)
+    events, total = service.list_published(q=q, limit=limit, offset=offset)
+    items = service.hydrate_list_items(events)
     return _paginate(items, total, limit, offset)
 
 
@@ -59,7 +60,8 @@ def list_mine(
     actor: User = Depends(get_current_user),
     service: EventService = Depends(_service),
 ) -> Page[EventListItem]:
-    items, total = service.list_mine(actor=actor, limit=limit, offset=offset)
+    events, total = service.list_mine(actor=actor, limit=limit, offset=offset)
+    items = service.hydrate_list_items(events)
     return _paginate(items, total, limit, offset)
 
 
@@ -74,7 +76,7 @@ def get_event(
     service: EventService = Depends(_service),
 ) -> EventRead:
     event = service.get(actor=actor, event_id=event_id)
-    return EventRead.model_validate(event)
+    return service.hydrate_read(event, actor=actor)
 
 
 @router.post(
@@ -89,7 +91,7 @@ def create_event(
     service: EventService = Depends(_service),
 ) -> EventRead:
     event = service.create(actor=actor, data=payload)
-    return EventRead.model_validate(event)
+    return service.hydrate_read(event, actor=actor)
 
 
 @router.patch(
@@ -104,7 +106,7 @@ def update_event(
     service: EventService = Depends(_service),
 ) -> EventRead:
     event = service.update(actor=actor, event_id=event_id, patch=payload)
-    return EventRead.model_validate(event)
+    return service.hydrate_read(event, actor=actor)
 
 
 @router.delete(
@@ -133,4 +135,4 @@ def transition_event(
     service: EventService = Depends(_service),
 ) -> EventRead:
     event = service.transition(actor=actor, event_id=event_id, to_status=payload.to_status)
-    return EventRead.model_validate(event)
+    return service.hydrate_read(event, actor=actor)

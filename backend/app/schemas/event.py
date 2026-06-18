@@ -4,6 +4,7 @@ from typing import Generic, TypeVar
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.event import EventStatus
+from app.models.registration import RegistrationStatus
 
 TITLE_MAX = 200
 LOCATION_MAX = 200
@@ -64,6 +65,9 @@ class EventRead(BaseModel):
     owner_id: int
     created_at: datetime
     updated_at: datetime
+    confirmed_count: int = 0
+    is_full: bool = False
+    my_registration_status: RegistrationStatus | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -77,6 +81,8 @@ class EventListItem(BaseModel):
     capacity: int
     status: EventStatus
     owner_id: int
+    confirmed_count: int = 0
+    is_full: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
