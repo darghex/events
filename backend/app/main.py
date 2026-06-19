@@ -10,6 +10,18 @@ from app.db.seed import seed_admin
 
 settings = get_settings()
 
+API_DESCRIPTION = """\
+API REST del MVP de gestión de eventos **Mis Eventos**.
+
+Cubre autenticación con JWT (access + refresh), RBAC con tres roles globales
+(`ADMIN`, `ORGANIZER`, `ATTENDEE`), CRUD de eventos con máquina de estados,
+agenda de sesiones con regla de no-solapamiento global del ponente, e
+inscripciones.
+
+Errores se devuelven con el shape canónico
+`{ "error": { "code": "...", "message": "...", "details": {} } }`.
+"""
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -17,12 +29,17 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.PROJECT_NAME, version="0.1.0", lifespan=lifespan)
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description=API_DESCRIPTION,
+    version="0.6.0",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=settings.cors_origins_list,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

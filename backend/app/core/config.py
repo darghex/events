@@ -27,12 +27,23 @@ class Settings(BaseSettings):
     SEED_ADMIN_EMAIL: EmailStr | None = None
     SEED_ADMIN_PASSWORD: str | None = None
 
+    # ----- CORS -----
+    # por defecto (dev local).
+    CORS_ORIGINS: str = "http://localhost:5173"
+
     @field_validator("JWT_SECRET")
     @classmethod
     def _no_placeholder_secret(cls, value: str) -> str:
         if value.strip().lower() in {"changeme", "secret", "todo"}:
             raise ValueError("JWT_SECRET no puede ser un placeholder")
         return value
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        raw = (self.CORS_ORIGINS or "").strip()
+        if not raw:
+            return ["http://localhost:5173"]
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
 
 @lru_cache

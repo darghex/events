@@ -24,7 +24,27 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'html'],
+      // Scope de cobertura a las capas con tests propios. Las páginas de
+      // composición (src/pages) se testean indirectamente vía sus formularios
+      // y App.test. Los wrappers de src/api son envoltorios delgados sobre
+      // axios que los consumidores mockean en sus propios tests.
+      include: [
+        'src/components/**/*.{ts,tsx}',
+        'src/hooks/**/*.{ts,tsx}',
+        'src/lib/**/*.{ts,tsx}',
+        'src/stores/**/*.{ts,tsx}',
+      ],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+      ],
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 70,
+        statements: 70,
+      },
     },
   },
 });

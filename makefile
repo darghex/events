@@ -44,10 +44,10 @@ sh-front:
 test: test-back test-front
 
 test-back:
-	$(COMPOSE) run --rm backend poetry run pytest --cov=app
+	$(COMPOSE) run --rm backend sh -c "poetry install --no-interaction --no-root >/dev/null && poetry run pytest --cov=app --cov-fail-under=80"
 
 test-front:
-	$(COMPOSE) run --rm frontend npm run test
+	$(COMPOSE) run --rm --no-deps frontend npm run test -- --coverage
 
 build:
 	$(COMPOSE) build
