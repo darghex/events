@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { fromLocalInput, toLocalInput } from '../../lib/datetime';
 import type { EventCreateInput, EventRead } from '../../types/event';
 
 interface EventoFormProps {
@@ -9,19 +10,6 @@ interface EventoFormProps {
   loading?: boolean;
   serverError?: string | null;
   onSubmit: (data: EventCreateInput) => void;
-}
-
-function toLocalInput(iso: string | undefined): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  // Convierte a YYYY-MM-DDTHH:mm en TZ local para <input type="datetime-local">
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function fromLocalInput(local: string): string {
-  // Date interpreta el input en TZ local; toISOString lo emite con offset UTC ("Z")
-  return new Date(local).toISOString();
 }
 
 export function EventoForm({

@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { fromLocalInput, toLocalInput } from '../../lib/datetime';
 import { SpeakerPicker } from './SpeakerPicker';
 import type { SessionCreateInput, SessionRead } from '../../types/session';
 import type { UserSearchResult } from '../../types/user';
@@ -11,17 +12,6 @@ interface SessionFormProps {
   loading?: boolean;
   serverError?: string | null;
   onSubmit: (data: SessionCreateInput) => void;
-}
-
-function toLocalInput(iso: string | undefined): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function fromLocalInput(local: string): string {
-  return new Date(local).toISOString();
 }
 
 export function SessionForm({

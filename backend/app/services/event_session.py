@@ -11,6 +11,7 @@ from app.core.errors import (
     SessionOverlap,
     ValidationFailed,
 )
+from app.core.time import as_utc
 from app.db.session import transactional
 from app.models.event import Event, EventStatus
 from app.models.event_session import EventSession
@@ -141,10 +142,10 @@ class EventSessionService:
     def _validate_in_event_range(
         self, event: Event, start_at: datetime, end_at: datetime
     ) -> None:
-        event_start = _as_utc(event.start_at)
-        event_end = _as_utc(event.end_at)
-        s_start = _as_utc(start_at)
-        s_end = _as_utc(end_at)
+        event_start = as_utc(event.start_at)
+        event_end = as_utc(event.end_at)
+        s_start = as_utc(start_at)
+        s_end = as_utc(end_at)
         if s_start < event_start or s_end > event_end:
             raise SessionOutOfRange(
                 details={
@@ -230,8 +231,3 @@ class EventSessionService:
         )
 
 
-def _as_utc(dt: datetime) -> datetime:
-    """Mismo defensivo que en `event_state.py` para tests con SQLite naive."""
-    from datetime import timezone
-
-    return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)

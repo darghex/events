@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, update
 from sqlmodel import Session, select
 
 from app.models.event import Event
@@ -96,13 +96,12 @@ class RegistrationRepository:
         Retorna el número de filas afectadas (para tests).
         """
         stmt = (
-            select(Registration)
+            update(Registration)
             .where(Registration.event_id == event_id)
             .where(Registration.status == RegistrationStatus.CONFIRMED)
+            .values(status=RegistrationStatus.CANCELLED)
+            .execution_options(synchronize_session="fetch")
         )
-        rows = list(self.session.exec(stmt).all())
-        for reg in rows:
-            reg.status = RegistrationStatus.CANCELLED
-            self.session.add(reg)
+        result = self.session.exec(stmt)  # type: ignore[arg-type]
         self.session.flush()
-        return len(rows)
+        return int(result.rowcount or 0)

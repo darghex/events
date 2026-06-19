@@ -6,23 +6,16 @@ está implícitamente bloqueado.
 """
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 
 from app.core.errors import InvalidTransition
+from app.core.time import as_utc, now_utc
 from app.models.event import Event, EventStatus
 from app.models.user import UserRole
 
 
 def _now_utc() -> datetime:
-    """Wrap aislado para facilitar monkey-patch en tests temporales."""
-    return datetime.now(timezone.utc)
-
-
-def _as_utc(dt: datetime) -> datetime:
-    """Asegura datetime aware en UTC. SQLite no preserva tzinfo en `DateTime(timezone=True)`,
-    así que defensivamente promovemos naive→UTC para que la comparación no truene en tests.
-    En PostgreSQL real los datetimes ya vienen aware."""
-    return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)
+    return now_utc()
 
 
 Validator = Callable[[Event, datetime], None]
@@ -55,7 +48,7 @@ def _check_publishable(event: Event, _now: datetime) -> None:
 
 
 def _check_can_start(event: Event, now: datetime) -> None:
-    if _as_utc(now) < _as_utc(event.start_at):
+    if as_utc(now) < as_utc(event.start_at):
         raise InvalidTransition(
             details={
                 "event_id": event.id,
@@ -67,7 +60,7 @@ def _check_can_start(event: Event, now: datetime) -> None:
 
 
 def _check_can_finish(event: Event, now: datetime) -> None:
-    if _as_utc(now) < _as_utc(event.end_at):
+    if as_utc(now) < as_utc(event.end_at):
         raise InvalidTransition(
             details={
                 "event_id": event.id,
